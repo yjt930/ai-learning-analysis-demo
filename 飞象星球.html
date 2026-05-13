@@ -5488,6 +5488,36 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
 })();
 </script>
 
+<!-- pin-comments needs stable shallow selectors; this saved React page has very deep anonymous DOM. -->
+<script>
+  (function seedPinCommentTargets() {
+    const PREFIX = 'pc-target-';
+    const EXCLUDE = 'script, style, link, meta, title, .pc-ui, .pc-ui *';
+
+    let nextId = 1;
+    function assign(root) {
+      const nodes = root.matches && !root.matches(EXCLUDE)
+        ? [root].concat(Array.from(root.querySelectorAll('*:not(script):not(style):not(link):not(meta):not(title)')))
+        : Array.from(root.querySelectorAll ? root.querySelectorAll('*:not(script):not(style):not(link):not(meta):not(title)') : []);
+
+      nodes.forEach((node) => {
+        if (node.id || node.closest('.pc-ui')) return;
+        node.dataset.pcTargetSeed = String(nextId++);
+        node.id = PREFIX + node.dataset.pcTargetSeed;
+      });
+    }
+
+    assign(document.body);
+    new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType === 1) assign(node);
+        });
+      });
+    }).observe(document.body, { childList: true, subtree: true });
+  })();
+</script>
+
 <!-- pin-comments: cloud comments via Supabase. Fill url/anonKey before sharing. -->
 <script>
   window.PIN_COMMENTS = {
