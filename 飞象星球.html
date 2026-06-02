@@ -2523,6 +2523,10 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
             <span class="fx-prd-toc-name">学情分析沉淀区</span>
             <span class="fx-prd-toc-meta">09</span>
           </button>
+          <button type="button" class="fx-prd-toc-btn" data-prd-doc="mobile-display">
+            <span class="fx-prd-toc-name">移动端展示边界</span>
+            <span class="fx-prd-toc-meta">10</span>
+          </button>
         </div>
       </nav>
       <section class="fx-prd-content">
@@ -2715,6 +2719,16 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
             <li>无主学情区：失败 + 提示。</li>
             <li>必填字段缺一：不设半成品。</li>
             <li>重复插入同一条助手回复：拦截。</li>
+      </ul>
+    </article>
+  </template>
+  <template id="fx-prd-template-mobile-display">
+    <article class="fx-prd-doc-section">
+      <h1>模块 10：移动端展示边界</h1>
+      <h2>功能逻辑</h2>
+      <ul>
+            <li>移动端仅支持展示，不支持对话和编辑。</li>
+            <li>展示内容同 Web。</li>
           </ul>
     </article>
   </template>
@@ -2952,7 +2966,8 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
     'reply-view': { title: 'AI 回复展示', meta: '06', templateId: 'fx-prd-template-reply-view' },
     'reply-tools': { title: '回复操作区', meta: '07', templateId: 'fx-prd-template-reply-tools' },
     helpers: { title: '会话辅助工具', meta: '08', templateId: 'fx-prd-template-helpers' },
-    'analysis-cards': { title: '学情分析沉淀区', meta: '09', templateId: 'fx-prd-template-analysis-cards' }
+    'analysis-cards': { title: '学情分析沉淀区', meta: '09', templateId: 'fx-prd-template-analysis-cards' },
+    'mobile-display': { title: '移动端展示边界', meta: '10', templateId: 'fx-prd-template-mobile-display' }
   };
   var activePrdDocId = 'entry-panel';
   var lastUserPrompt = '';
