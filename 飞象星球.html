@@ -1406,11 +1406,21 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
   border-color: #ffccc7;
   background: #fff1f0;
 }
-#fx-ai-learning-root .fx-ai-insert-btn--added,
-#fx-ai-learning-root .fx-ai-insert-btn:disabled {
+#fx-ai-learning-root .fx-ai-insert-btn--added {
   color: #389e0d;
   border-color: #b7eb8f;
   background: #f6ffed;
+  cursor: pointer;
+}
+#fx-ai-learning-root .fx-ai-insert-btn--added:hover {
+  color: #237804;
+  border-color: #95de64;
+  background: #f6ffed;
+}
+#fx-ai-learning-root .fx-ai-insert-btn:disabled {
+  color: #b8c2cc;
+  border-color: #e5eaf1;
+  background: #f8fafc;
   cursor: not-allowed;
 }
 
@@ -2102,9 +2112,18 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
   transition: opacity 0.22s ease, visibility 0.22s ease;
   container-type: size;
   container-name: fx-prd;
-  /* 随面板宽度略放大字号：约 720px 宽时接近原 16px 基准；无 cqi 支持时退回 16px */
-  font-size: 16px;
-  font-size: clamp(12.5px, 2.22cqi, 22px);
+  /* 随窗口宽度略放大字号：约 720px 宽时接近 14px 基准；无 cqi 支持时退回 14px */
+  font-size: 14px;
+  font-size: var(--fx-prd-font-size, clamp(12px, 1.95cqi, 18px));
+}
+#fx-ai-learning-root .fx-prd-panel.fx-prd-font-small {
+  --fx-prd-font-size: clamp(11px, 1.65cqi, 15px);
+}
+#fx-ai-learning-root .fx-prd-panel.fx-prd-font-medium {
+  --fx-prd-font-size: clamp(12px, 1.95cqi, 18px);
+}
+#fx-ai-learning-root .fx-prd-panel.fx-prd-font-large {
+  --fx-prd-font-size: clamp(13px, 2.25cqi, 21px);
 }
 #fx-ai-learning-root.fx-prd-open .fx-prd-panel {
   opacity: 1;
@@ -2173,6 +2192,28 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
   color: #722ed1;
   font-weight: 700;
   font-size: 0.75em;
+}
+#fx-ai-learning-root .fx-prd-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+#fx-ai-learning-root .fx-prd-font-btn {
+  min-width: 64px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid rgba(114,46,209,0.16);
+  border-radius: 999px;
+  background: #fff;
+  color: #531dab;
+  font-size: 0.8125em;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+}
+#fx-ai-learning-root .fx-prd-font-btn:hover {
+  background: #f4ebff;
 }
 #fx-ai-learning-root .fx-prd-layout {
   flex: 1;
@@ -2356,6 +2397,13 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
     border-right: none;
     border-bottom: 1px solid #f0f0f0;
   }
+  #fx-ai-learning-root .fx-prd-header {
+    align-items: flex-start;
+    gap: 12px;
+  }
+  #fx-ai-learning-root .fx-prd-font-btn {
+    min-width: 56px;
+  }
 }
 </style>
 
@@ -2367,7 +2415,7 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
   <button type="button" class="fx-ai-entry" id="fx-ai-open-btn" title="打开 AI 学情助手" aria-haspopup="dialog" aria-expanded="false" aria-controls="fx-ai-panel">
     <span class="fx-ai-entry-brand" aria-hidden="true">AI</span>
     <span class="fx-ai-entry-copy">
-      <span class="fx-ai-entry-placeholder">问答、诊断都可以找我...</span>
+      <span class="fx-ai-entry-placeholder">发消息</span>
     </span>
     <span class="fx-ai-entry-action" aria-hidden="true">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -2479,9 +2527,12 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
           <p>研发可直接查看模块功能逻辑、交互说明、异常逻辑和验收标准。</p>
         </div>
       </div>
-      <button type="button" class="fx-ai-icon-btn" id="fx-prd-close-btn" title="关闭 PRD">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-      </button>
+      <div class="fx-prd-header-actions">
+        <button type="button" class="fx-prd-font-btn" id="fx-prd-font-btn" title="切换 PRD 字号" aria-label="切换 PRD 字号">字号 中</button>
+        <button type="button" class="fx-ai-icon-btn" id="fx-prd-close-btn" title="关闭 PRD">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </div>
     </header>
     <div class="fx-prd-layout">
       <nav class="fx-prd-sidebar" aria-label="PRD 目录">
@@ -2546,15 +2597,15 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
       <h2>功能逻辑</h2>
       <ul>
             <li>灰度：仅对已开通该功能灰度的学校展示入口与面板；未开通灰度的学校不渲染入口，用户无感知。</li>
-            <li>悬浮入口：仅 AI 图标 + 文案 <code>问答、诊断都可以找我...</code>（不显示 <code>AI 学情助手</code>）。</li>
+            <li>悬浮入口：仅 AI 图标 + 默认文案 <code>发消息</code>（不显示 <code>AI 学情助手</code>）。</li>
             <li>点击入口：当前页右侧打开侧边面板。</li>
             <li>面板结构：顶栏、主体、底栏输入区、范围说明、免责声明。</li>
-            <li>关闭面板：不清空会话；再打开时恢复上次消息与滚动位置。</li>
+            <li>关闭对话框：不清空会话；再打开时恢复上次消息与滚动位置。</li>
           </ul>
       <h2>交互说明</h2>
       <ul>
             <li>入口：打开面板。</li>
-            <li>关闭按钮：关闭面板。</li>
+            <li>关闭按钮：关闭对话框。</li>
             <li>面板打开：入口按钮为展开态。</li>
             <li>关闭后再打开：不回到欢迎态，除非用户新建对话。</li>
           </ul>
@@ -2572,7 +2623,7 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
       <h1>模块 2：欢迎态与快捷问题</h1>
       <h2>功能逻辑</h2>
       <ul>
-            <li>触发：面板打开 且 当前会话无消息。</li>
+            <li>触发：对话框打开 且 当前会话无消息。</li>
             <li>内容：主标题（唯一一句，无副标题）、快捷问题组、模板区（已接入则显示）。</li>
             <li>快捷问题点击即走标准分析，不要求用户再输入。</li>
           </ul>
@@ -2589,13 +2640,13 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
       <ul>
             <li>班级名称展示的是当前学情选择的班级，切换不同班级时，文案会变化</li>
           </ul>
-      <h2>面板关闭后再打开（欢迎显隐）</h2>
+      <h2>对话框关闭后再打开（欢迎显隐）</h2>
       <ul>
-            <li>仅与本端当前 线程画布有关：画布上已有助手或用户消息（≥1）→ 不显示欢迎；画布为空 → 显示欢迎。</li>
-            <li>关闭面板 不 清空画布）；再打开时恢复关闭前消息与滚动，欢迎态仍按上条判定（有消息则继续隐藏）。</li>
-            <li>若关闭期间 同一请求仍在生成（未失败/未结束）：再打开后仍 无欢迎；展示最新流式/已落版内容</li>
-            <li>用户已点「新对话」且清空成功后再关再开：显示欢迎。</li>
-            <li>刷新页面再次打开：显示欢迎</li>
+            <li>欢迎态仅取决于本端当前对话框画布：画布上已有助手或用户消息（≥1 条）→ 不显示欢迎；画布为空 → 显示欢迎。</li>
+            <li>关闭对话框不会清空画布；再次打开时恢复关闭前消息与滚动位置，欢迎态仍按上条判定（有消息则继续隐藏）。</li>
+            <li>关闭期间同一请求仍在生成（未失败/未结束）：再次打开后仍不显示欢迎，展示最新流式内容或已落版结果。</li>
+            <li>用户点击「新对话」且清空成功后，关闭并再次打开对话框：显示欢迎。</li>
+            <li>刷新页面后再次打开对话框：显示欢迎。</li>
           </ul>
     </article>
   </template>
@@ -2614,8 +2665,8 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
       <h1>模块 4：分析范围管理</h1>
       <h2>功能逻辑</h2>
       <ul>
-            <li>范围：当前作文全部班级</li>
-            <li>根据用户提问的班级（可以多个），自动确定分析的班级，后续分析基于所选的班级</li>
+            <li>分析范围：当前作业下，有老师任教的全部班级。</li>
+            <li>默认将用户定位的班级 id 和班级名传给模型；根据用户提问的班级（可以多个），自动确定分析班级，后续分析基于所选班级。</li>
           </ul>
     </article>
   </template>
@@ -2624,13 +2675,11 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
       <h1>模块 5：prompt</h1>
       <h2>功能逻辑</h2>
       <table>
-        <thead>
-          <tr><th>名称</th><th>id</th><th>输入</th><th>输出</th></tr>
-        </thead>
+        <thead><tr><th>名称</th><th>id</th><th>输入</th><th>输出</th></tr></thead>
         <tbody>
-          <tr><td>systemprompt</td><td></td><td></td><td></td></tr>
-          <tr><td>总结模型（避免上下文过长）</td><td></td><td></td><td></td></tr>
-          <tr><td>学情标题模型（根据对话生成标题）</td><td></td><td></td><td></td></tr>
+          <tr><td>主提示词</td><td>12082</td><td>用户 query</td><td>模型流式回复，包含思考过程、工具调用过程和最终学情分析结果</td></tr>
+          <tr><td>加入学情分析后的标题</td><td>12437</td><td>添加到学情分析的 AI 输出文本</td><td>JSON：<code>{&quot;title&quot;: &quot;&quot;}</code></td></tr>
+          <tr><td>上下文压缩</td><td>12438</td><td>非最近两轮的全部 user 输入和 assistant 输出</td><td>JSON：<code>{&quot;summary&quot;: &quot;&quot;, &quot;next_step&quot;: &quot;&quot;}</code></td></tr>
         </tbody>
       </table>
     </article>
@@ -2650,7 +2699,7 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
             <li>白色展示的是调用的工具的文案。</li>
             <li>工具调用文案规则：”使用{工具中文名称}查询{类目名称}“，如果没有类目名称咋不展示，目前只有班级一稿、二稿分析工具需要用到类目名称。例如：使用班级一稿分析工具查询分数；使用学生信息查询工具查询</li>
             <li>skills 调用文案规则：“调用专业框架分析{skills 名称}。例如：调用专业分析框架分析典型作文</li>
-            <li>流式输出的时候，不期望前端展示“&lt;thought&gt;标签”，只展示thought中内容和工具调用的文案</li>
+            <li>流式输出只展示模型返回的文本和工具调用时的固定文案，不展示模型返回的工具查询内容。</li>
           </ul>
       <h2>功能逻辑-最终回复</h2>
       <ul>
@@ -2682,8 +2731,9 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
       <h2>加入到学情分析</h2>
       <ul>
             <li>点击后，读取当前回复文本、来源问题、当前班级范围等信息。</li>
-            <li>生成一张分析卡片并插入当前选择班级的主学情分析区，位置在学情分析最顶部，后续每次插入的内容，都在最顶部。</li>
-            <li>成功后按钮文案变为 <code>已加入学情分析</code>，且不可再次点击。</li>
+            <li>生成一张分析卡片并插入到 <strong>学生作文列表</strong> 上方；后续每次添加，都会在上面已添加内容的上方继续添加。</li>
+            <li>最多加入 <strong>10</strong> 个内容；加入 10 个之后，再次添加时 toast 提示：<code>最多添加10个内容</code>，并禁止继续加入。</li>
+            <li>成功后按钮文案可变为 <code>已加入学情分析</code>，但按钮不置灰、保持可点击；再次点击时定位到已加入的分析卡片，不重复插入。</li>
             <li>加入到学情分析的内容，应该是按照布置 id+班级id去记忆，也就是不同老师看到的应当是一样的</li>
           </ul>
     </article>
@@ -2694,32 +2744,27 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
       <h2>交互说明</h2>
       <ul>
             <li>点击后立即生成并插入。</li>
+            <li>将 AI 回复的内容加入之后，卡片内容展示为富文本，保留回复中的段落、列表、表格等结构。</li>
             <li>标题会由模型生成，会根据内容去请求模型，然后返回。</li>
             <li>如果还在加载，标题处显示加载中转圈的样式；失败等异常可以不重试，直接展示为空</li>
             <li>插入后滚动到新卡可见。</li>
-            <li>同一条助手回复在 <strong>对应卡片仍存在</strong> 时 <strong>只允许</strong> 成功插入一次（删除卡片后可再次插入，见下文「删除」）。</li>
           </ul>
       <h2>插入后的行为：编辑</h2>
       <ul>
             <li><strong>触发</strong>：卡片上的「编辑」入口（图标或文字），或整块可点进入编辑态（二选一由 UI 定，需与无障碍一致）。</li>
             <li><strong>编辑范围</strong>：仅改 <strong>当前卡片展示字段</strong>（标题和内容）；<strong>不回写</strong> 原始助手消息正文，避免与会话历史冲突。</li>
+            <li><strong>内容编辑</strong>：支持富文本编辑器编辑，至少包含无序列表、有序列表、加粗、下划线、文字颜色（黑色和红色）、表格（增加、删除）。</li>
+            <li><strong>标题编辑</strong>：标题无需富文本编辑，按普通文本直接编辑标题内容即可。</li>
             <li><strong>保存与取消</strong>：显式「保存」「取消」；取消丢弃本次未保存修改；离开页面/刷新前若有未保存修改 → 与全局草稿策略一致（确认或自动存草案，占坑）。</li>
-            <li><strong>富文本编辑器</strong>：支持富文本编辑器，样式可以和详情页保持一致（待确认需要哪些富文本编辑样式）</li>
           </ul>
       <h2>插入后的行为：删除</h2>
       <ul>
             <li><strong>触发</strong>：卡片「删除」；需 <strong>二次确认</strong>（弹窗或危险操作样式），避免误触。</li>
             <li><strong>数据</strong>：删除后该卡片从主学情区移除；<strong>会话侧</strong> 对应助手回复上的「已加入学情分析」状态应 <strong>解除</strong>（允许用户再次从同一条回复 <strong>重新加入</strong>，生成新卡；<strong>不自动恢复</strong> 已删内容，除非产品有「撤销删除」占坑）。</li>
-            <li><strong>与「只允许插入一次」的关系</strong>：「一次」指 <strong>同一会话、同一条助手回复、未删除前</strong> 只能成功插入一张；删除后视为该绑定失效，可再次插入（见上）。</li>
+            <li><strong>与重复点击的关系</strong>：卡片未删除前，再次点击「已加入学情分析」只定位已有卡片；删除后视为该绑定失效，可再次插入。</li>
           </ul>
       <h2>状态</h2>
       <p>未插入 / 成功 / 失败</p>
-      <h2>异常逻辑</h2>
-      <ul>
-            <li>无主学情区：失败 + 提示。</li>
-            <li>必填字段缺一：不设半成品。</li>
-            <li>重复插入同一条助手回复：拦截。</li>
-      </ul>
     </article>
   </template>
   <template id="fx-prd-template-mobile-display">
@@ -2727,7 +2772,7 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
       <h1>模块 10：移动端展示边界</h1>
       <h2>功能逻辑</h2>
       <ul>
-            <li>移动端仅支持展示，不支持对话和编辑。</li>
+            <li>移动端仅支持展示，不支持对话、编辑和删除。</li>
             <li>展示内容同 Web。</li>
           </ul>
     </article>
@@ -2926,6 +2971,7 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
   var prdOpenBtn = document.getElementById('fx-prd-open-btn');
   var prdPanel = document.getElementById('fx-prd-panel');
   var prdCloseBtn = document.getElementById('fx-prd-close-btn');
+  var prdFontBtn = document.getElementById('fx-prd-font-btn');
   var prdDocWrap = document.getElementById('fx-prd-doc');
   var prdContentTitle = document.getElementById('fx-prd-content-title');
   var prdContentMeta = document.getElementById('fx-prd-content-meta');
@@ -2970,6 +3016,7 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
     'mobile-display': { title: '移动端展示边界', meta: '10', templateId: 'fx-prd-template-mobile-display' }
   };
   var activePrdDocId = 'entry-panel';
+  var prdFontSize = 'medium';
   var lastUserPrompt = '';
 
   // ===== Template Storage (localStorage) =====
@@ -3793,6 +3840,23 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
       || document.querySelector('.detail-container_Yrkd7');
   }
 
+  function getStudentEssayListAnchor(host) {
+    if (!host) return null;
+    return host.querySelector('[class*="studentCorrectRecordList"]');
+  }
+
+  function placeMergedSectionBeforeStudentList(section, host) {
+    if (!section || !host) return;
+    var anchor = getStudentEssayListAnchor(host);
+    if (anchor && anchor.parentNode) {
+      anchor.parentNode.insertBefore(section, anchor);
+      return;
+    }
+    if (!section.parentNode) {
+      host.appendChild(section);
+    }
+  }
+
   function extractClassLabel(text) {
     var match = String(text || '')
       .replace(/\s+/g, ' ')
@@ -3973,6 +4037,7 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
     if (!host) return null;
     var section = document.getElementById('fx-ai-merged-section');
     if (section) {
+      placeMergedSectionBeforeStudentList(section, host);
       var legacyDrag = section.querySelector('.fx-ai-merged-drag-handle');
       if (legacyDrag) legacyDrag.remove();
       bindMergedSectionInteractions(section);
@@ -3999,12 +4064,7 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
       +   '</div>'
       + '</div>'
       + '<div class="fx-ai-merged-list"></div>';
-    var anchor = host.querySelector('.scoreDistribution_KXlR3') || host.firstElementChild;
-    if (anchor && anchor.nextSibling) {
-      host.insertBefore(section, anchor.nextSibling);
-    } else {
-      host.appendChild(section);
-    }
+    placeMergedSectionBeforeStudentList(section, host);
     bindMergedSectionInteractions(section);
     updateMergedSectionCount();
     setActiveMergedCard(section);
@@ -4216,7 +4276,7 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
     }
 
     function syncInsertButton(isInserted) {
-      insertBtn.disabled = !!isInserted;
+      insertBtn.disabled = false;
       insertBtn.classList.toggle('fx-ai-insert-btn--added', !!isInserted);
       insertBtn.textContent = isInserted ? '已加入学情分析' : '加入到学情分析';
     }
@@ -4248,7 +4308,13 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
       });
     });
     insertBtn.addEventListener('click', function () {
-      if (insertBtn.disabled) return;
+      if (mergedCard && document.body.contains(mergedCard)) {
+        syncInsertButton(true);
+        closePanel();
+        mergedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        showToast('已定位到学情分析内容');
+        return;
+      }
       mergedCard = insertGeneratedContentIntoAnalysis({
         answerText: answerText,
         promptText: promptText,
@@ -4416,6 +4482,26 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
   function syncPrdA11y(isOpen) {
     if (prdOpenBtn) prdOpenBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
     if (prdPanel) prdPanel.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+  }
+
+  function setPrdFontSize(size) {
+    var allowed = ['small', 'medium', 'large'];
+    var labelMap = { small: '小', medium: '中', large: '大' };
+    prdFontSize = allowed.indexOf(size) >= 0 ? size : 'medium';
+    if (prdPanel) {
+      allowed.forEach(function (item) {
+        prdPanel.classList.toggle('fx-prd-font-' + item, item === prdFontSize);
+      });
+    }
+    if (prdFontBtn) {
+      prdFontBtn.textContent = '字号 ' + labelMap[prdFontSize];
+      prdFontBtn.setAttribute('aria-label', '切换 PRD 字号，当前' + labelMap[prdFontSize]);
+    }
+  }
+
+  function cyclePrdFontSize() {
+    var nextMap = { small: 'medium', medium: 'large', large: 'small' };
+    setPrdFontSize(nextMap[prdFontSize] || 'medium');
   }
 
   function renderPrdDoc(docId) {
@@ -5379,6 +5465,7 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
   if (openBtn) openBtn.addEventListener('click', openPanel);
   if (backdrop) backdrop.addEventListener('click', closePanel);
   if (prdCloseBtn) prdCloseBtn.addEventListener('click', closePrdPanel);
+  if (prdFontBtn) prdFontBtn.addEventListener('click', cyclePrdFontSize);
   prdTocButtons.forEach(function (btn) {
     btn.addEventListener('click', function () {
       openPrdPanel(btn.getAttribute('data-prd-doc'));
@@ -5498,6 +5585,7 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
   syncPanelA11y(false);
   syncFullscreenButton();
   refreshUserTemplates();
+  setPrdFontSize(prdFontSize);
   renderPrdDoc(activePrdDocId);
   syncPrdA11y(false);
 })();
