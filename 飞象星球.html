@@ -2215,6 +2215,34 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
 #fx-ai-learning-root .fx-prd-font-btn:hover {
   background: #f4ebff;
 }
+#fx-ai-learning-root .fx-prd-edit-btn {
+  min-width: 56px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid rgba(114,46,209,0.16);
+  border-radius: 999px;
+  background: #fff;
+  color: #531dab;
+  font-size: 0.8125em;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+}
+#fx-ai-learning-root .fx-prd-edit-btn:hover {
+  background: #f4ebff;
+}
+#fx-ai-learning-root .fx-prd-edit-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.56;
+}
+#fx-ai-learning-root .fx-prd-push-btn {
+  border-color: rgba(31,120,255,0.22);
+  background: #1f78ff;
+  color: #fff;
+}
+#fx-ai-learning-root .fx-prd-push-btn:hover {
+  background: #1359d2;
+}
 #fx-ai-learning-root .fx-prd-layout {
   flex: 1;
   min-height: 0;
@@ -2293,6 +2321,19 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
   font-size: 0.8125em;
   color: #8c8c8c;
 }
+#fx-ai-learning-root .fx-prd-edit-status {
+  min-height: 18px;
+  margin-top: 8px;
+  color: #667085;
+  font-size: 0.75em;
+  line-height: 18px;
+}
+#fx-ai-learning-root .fx-prd-edit-status.is-success {
+  color: #00ad45;
+}
+#fx-ai-learning-root .fx-prd-edit-status.is-error {
+  color: #f5443b;
+}
 #fx-ai-learning-root .fx-prd-doc {
   flex: 1;
   min-height: 0;
@@ -2300,6 +2341,15 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
   padding: 24px;
   color: #344054;
   line-height: 1.75;
+}
+#fx-ai-learning-root .fx-prd-doc.is-editing {
+  background: #fffdf7;
+  outline: 2px solid rgba(247,163,0,0.28);
+  outline-offset: -2px;
+}
+#fx-ai-learning-root .fx-prd-doc[contenteditable="true"]:focus {
+  outline: 2px solid rgba(31,120,255,0.36);
+  outline-offset: -2px;
 }
 #fx-ai-learning-root .fx-prd-doc h1,
 #fx-ai-learning-root .fx-prd-doc h2,
@@ -2403,6 +2453,10 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
   }
   #fx-ai-learning-root .fx-prd-font-btn {
     min-width: 56px;
+  }
+  #fx-ai-learning-root .fx-prd-header-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
 }
 </style>
@@ -2528,6 +2582,10 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
         </div>
       </div>
       <div class="fx-prd-header-actions">
+        <button type="button" class="fx-prd-edit-btn" id="fx-prd-edit-btn" title="编辑当前 PRD">编辑</button>
+        <button type="button" class="fx-prd-edit-btn" id="fx-prd-save-btn" title="保存当前 PRD" hidden>保存</button>
+        <button type="button" class="fx-prd-edit-btn" id="fx-prd-cancel-btn" title="取消编辑" hidden>取消</button>
+        <button type="button" class="fx-prd-edit-btn fx-prd-push-btn" id="fx-prd-push-btn" title="推送已保存的 PRD 到 GitHub">推送</button>
         <button type="button" class="fx-prd-font-btn" id="fx-prd-font-btn" title="切换 PRD 字号" aria-label="切换 PRD 字号">字号 中</button>
         <button type="button" class="fx-ai-icon-btn" id="fx-prd-close-btn" title="关闭 PRD">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
@@ -2584,6 +2642,7 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
         <div class="fx-prd-content-head">
           <h3 id="fx-prd-content-title">入口与面板容器</h3>
           <p id="fx-prd-content-meta">01</p>
+          <div class="fx-prd-edit-status" id="fx-prd-edit-status" aria-live="polite"></div>
         </div>
         <div class="fx-prd-doc" id="fx-prd-doc"></div>
       </section>
@@ -2971,9 +3030,14 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
   var prdPanel = document.getElementById('fx-prd-panel');
   var prdCloseBtn = document.getElementById('fx-prd-close-btn');
   var prdFontBtn = document.getElementById('fx-prd-font-btn');
+  var prdEditBtn = document.getElementById('fx-prd-edit-btn');
+  var prdSaveBtn = document.getElementById('fx-prd-save-btn');
+  var prdCancelBtn = document.getElementById('fx-prd-cancel-btn');
+  var prdPushBtn = document.getElementById('fx-prd-push-btn');
   var prdDocWrap = document.getElementById('fx-prd-doc');
   var prdContentTitle = document.getElementById('fx-prd-content-title');
   var prdContentMeta = document.getElementById('fx-prd-content-meta');
+  var prdEditStatus = document.getElementById('fx-prd-edit-status');
   var prdTocButtons = root.querySelectorAll('.fx-prd-toc-btn');
   var prdHeader = document.querySelector('#fx-prd-panel .fx-prd-header');
   var panelBody = document.getElementById('fx-ai-panel-body');
@@ -3016,6 +3080,16 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
   };
   var activePrdDocId = 'entry-panel';
   var prdFontSize = 'medium';
+  var prdIsEditing = false;
+  var prdIsPushing = false;
+  var prdEditOriginalHtml = '';
+  var PRD_DRAFTS_KEY = 'fx-prd-inline-edits-v1';
+  var PRD_TOKEN_KEY = 'fx-prd-github-token';
+  var PRD_GITHUB_OWNER = 'yjt930';
+  var PRD_GITHUB_REPO = 'ai-learning-analysis-demo';
+  var PRD_GITHUB_BRANCH = 'main';
+  var PRD_GITHUB_PATH = '飞象星球.html';
+  var prdDrafts = {};
   var lastUserPrompt = '';
 
   // ===== Template Storage (localStorage) =====
@@ -4503,19 +4577,224 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
     setPrdFontSize(nextMap[prdFontSize] || 'medium');
   }
 
+  function loadPrdDrafts() {
+    try {
+      var raw = window.localStorage.getItem(PRD_DRAFTS_KEY);
+      var parsed = raw ? JSON.parse(raw) : {};
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch (err) {
+      return {};
+    }
+  }
+
+  function persistPrdDrafts() {
+    window.localStorage.setItem(PRD_DRAFTS_KEY, JSON.stringify(prdDrafts));
+  }
+
+  function getPrdDraftCount() {
+    return Object.keys(prdDrafts).filter(function (id) {
+      return prdDocs[id] && typeof prdDrafts[id] === 'string';
+    }).length;
+  }
+
+  function setPrdStatus(text, tone) {
+    if (!prdEditStatus) return;
+    prdEditStatus.textContent = text || '';
+    prdEditStatus.classList.toggle('is-success', tone === 'success');
+    prdEditStatus.classList.toggle('is-error', tone === 'error');
+  }
+
+  function refreshPrdEditButtons() {
+    if (prdEditBtn) prdEditBtn.hidden = prdIsEditing;
+    if (prdSaveBtn) prdSaveBtn.hidden = !prdIsEditing;
+    if (prdCancelBtn) prdCancelBtn.hidden = !prdIsEditing;
+    if (prdPushBtn) {
+      prdPushBtn.disabled = prdIsPushing;
+      prdPushBtn.textContent = prdIsPushing ? '推送中' : '推送';
+    }
+  }
+
+  function getPrdHtml(docId) {
+    var doc = prdDocs[docId];
+    var template = doc ? document.getElementById(doc.templateId) : null;
+    if (prdDrafts[docId]) return prdDrafts[docId];
+    return template ? template.innerHTML : '';
+  }
+
+  function setPrdEditing(isEditing) {
+    prdIsEditing = !!isEditing;
+    if (prdDocWrap) {
+      prdDocWrap.contentEditable = prdIsEditing ? 'true' : 'false';
+      prdDocWrap.classList.toggle('is-editing', prdIsEditing);
+      if (prdIsEditing) {
+        prdDocWrap.focus({ preventScroll: true });
+      }
+    }
+    refreshPrdEditButtons();
+  }
+
+  function beginPrdEdit() {
+    if (!prdDocWrap || prdIsEditing) return;
+    prdEditOriginalHtml = prdDocWrap.innerHTML;
+    setPrdEditing(true);
+    setPrdStatus('正在编辑当前 PRD，保存后可推送到 GitHub。');
+  }
+
+  function saveActivePrdDraft(options) {
+    if (!prdDocWrap || !prdDocs[activePrdDocId]) return false;
+    var html = prdDocWrap.innerHTML.trim();
+    if (!html) {
+      setPrdStatus('当前 PRD 为空，未保存。', 'error');
+      return false;
+    }
+    prdDrafts[activePrdDocId] = html;
+    persistPrdDrafts();
+    var template = document.getElementById(prdDocs[activePrdDocId].templateId);
+    if (template) template.innerHTML = html;
+    setPrdEditing(false);
+    if (!options || !options.silent) {
+      setPrdStatus('已保存到本机浏览器，共 ' + getPrdDraftCount() + ' 个 PRD 待推送。', 'success');
+    }
+    return true;
+  }
+
+  function cancelPrdEdit() {
+    if (!prdDocWrap || !prdIsEditing) return;
+    prdDocWrap.innerHTML = prdEditOriginalHtml;
+    setPrdEditing(false);
+    setPrdStatus('已取消本次编辑。');
+  }
+
+  function escapePrdRegExp(text) {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  function replacePrdTemplateInSource(source, templateId, innerHtml) {
+    var re = new RegExp("(<template\\s+id=[\"']" + escapePrdRegExp(templateId) + "[\"'][^>]*>)([\\s\\S]*?)(\\n\\s*</template>)");
+    if (!re.test(source)) {
+      throw new Error('未找到模板：' + templateId);
+    }
+    return source.replace(re, function (_match, open, _oldInner, close) {
+      return open + '\n' + innerHtml.trim() + close;
+    });
+  }
+
+  function base64ToUtf8(base64) {
+    var binary = window.atob(base64.replace(/\s/g, ''));
+    var bytes = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  }
+
+  function utf8ToBase64(text) {
+    var bytes = new TextEncoder().encode(text);
+    var binary = '';
+    var chunkSize = 0x8000;
+    for (var i = 0; i < bytes.length; i += chunkSize) {
+      var chunk = bytes.subarray(i, i + chunkSize);
+      binary += String.fromCharCode.apply(null, chunk);
+    }
+    return window.btoa(binary);
+  }
+
+  function getGithubToken() {
+    var token = window.localStorage.getItem(PRD_TOKEN_KEY) || '';
+    if (!token) {
+      token = window.prompt('请输入 GitHub fine-grained token（需要 Contents: Read and write）') || '';
+      token = token.trim();
+      if (token) window.localStorage.setItem(PRD_TOKEN_KEY, token);
+    }
+    return token;
+  }
+
+  async function pushPrdDraftsToGithub() {
+    if (prdIsPushing) return;
+    if (prdIsEditing && !saveActivePrdDraft({ silent: true })) return;
+    if (!getPrdDraftCount()) {
+      setPrdStatus('没有已保存的 PRD 修改需要推送。');
+      return;
+    }
+    var token = getGithubToken();
+    if (!token) {
+      setPrdStatus('未填写 GitHub token，已取消推送。', 'error');
+      return;
+    }
+    var apiUrl = 'https://api.github.com/repos/' + PRD_GITHUB_OWNER + '/' + PRD_GITHUB_REPO + '/contents/' + encodeURIComponent(PRD_GITHUB_PATH) + '?ref=' + encodeURIComponent(PRD_GITHUB_BRANCH);
+    prdIsPushing = true;
+    refreshPrdEditButtons();
+    setPrdStatus('正在读取 GitHub 最新版本...');
+    try {
+      var getRes = await window.fetch(apiUrl, {
+        headers: {
+          Accept: 'application/vnd.github+json',
+          Authorization: 'Bearer ' + token,
+          'X-GitHub-Api-Version': '2022-11-28'
+        }
+      });
+      var fileData = await getRes.json();
+      if (!getRes.ok) throw new Error(fileData.message || '读取 GitHub 文件失败');
+      var source = base64ToUtf8(fileData.content);
+      var nextSource = source;
+      Object.keys(prdDrafts).forEach(function (docId) {
+        var doc = prdDocs[docId];
+        if (!doc || typeof prdDrafts[docId] !== 'string') return;
+        nextSource = replacePrdTemplateInSource(nextSource, doc.templateId, prdDrafts[docId]);
+      });
+      if (nextSource === source) {
+        setPrdStatus('没有检测到可提交的内容变化。');
+        return;
+      }
+      setPrdStatus('正在提交到 GitHub...');
+      var putRes = await window.fetch(apiUrl, {
+        method: 'PUT',
+        headers: {
+          Accept: 'application/vnd.github+json',
+          Authorization: 'Bearer ' + token,
+          'Content-Type': 'application/json',
+          'X-GitHub-Api-Version': '2022-11-28'
+        },
+        body: JSON.stringify({
+          message: 'Update PRD from inline editor',
+          content: utf8ToBase64(nextSource),
+          sha: fileData.sha,
+          branch: PRD_GITHUB_BRANCH
+        })
+      });
+      var putData = await putRes.json();
+      if (!putRes.ok) throw new Error(putData.message || '提交 GitHub 失败');
+      prdDrafts = {};
+      persistPrdDrafts();
+      setPrdStatus('已推送到 GitHub：' + (putData.commit && putData.commit.sha ? putData.commit.sha.slice(0, 7) : '成功'), 'success');
+    } catch (err) {
+      if (/Bad credentials/i.test(err.message || '')) {
+        window.localStorage.removeItem(PRD_TOKEN_KEY);
+      }
+      setPrdStatus(err.message || '推送失败', 'error');
+    } finally {
+      prdIsPushing = false;
+      refreshPrdEditButtons();
+    }
+  }
+
   function renderPrdDoc(docId) {
     var id = prdDocs[docId] ? docId : 'entry-panel';
     var doc = prdDocs[id];
     var template = document.getElementById(doc.templateId);
     if (!doc || !template || !prdDocWrap) return;
+    if (prdIsEditing && id !== activePrdDocId) {
+      var shouldSave = window.confirm('当前 PRD 正在编辑，是否保存后切换？');
+      if (!shouldSave || !saveActivePrdDraft({ silent: true })) return;
+    }
     activePrdDocId = id;
     if (prdContentTitle) prdContentTitle.textContent = doc.title;
     if (prdContentMeta) prdContentMeta.textContent = doc.meta;
-    prdDocWrap.innerHTML = template.innerHTML;
+    prdDocWrap.innerHTML = getPrdHtml(id);
+    setPrdEditing(false);
     prdTocButtons.forEach(function (btn) {
       btn.classList.toggle('is-active', btn.getAttribute('data-prd-doc') === id);
     });
     prdDocWrap.scrollTop = 0;
+    setPrdStatus(prdDrafts[id] ? '该 PRD 有本机保存版本，可继续编辑或推送。' : '');
   }
 
   function openPrdPanel(docId) {
@@ -4528,6 +4807,10 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
   }
 
   function closePrdPanel() {
+    if (prdIsEditing) {
+      var shouldSave = window.confirm('当前 PRD 正在编辑，是否保存后关闭？');
+      if (!shouldSave || !saveActivePrdDraft()) return;
+    }
     root.classList.remove('fx-prd-open');
     syncPrdA11y(false);
   }
@@ -5465,6 +5748,12 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
   if (backdrop) backdrop.addEventListener('click', closePanel);
   if (prdCloseBtn) prdCloseBtn.addEventListener('click', closePrdPanel);
   if (prdFontBtn) prdFontBtn.addEventListener('click', cyclePrdFontSize);
+  if (prdEditBtn) prdEditBtn.addEventListener('click', beginPrdEdit);
+  if (prdSaveBtn) prdSaveBtn.addEventListener('click', function () {
+    saveActivePrdDraft();
+  });
+  if (prdCancelBtn) prdCancelBtn.addEventListener('click', cancelPrdEdit);
+  if (prdPushBtn) prdPushBtn.addEventListener('click', pushPrdDraftsToGithub);
   prdTocButtons.forEach(function (btn) {
     btn.addEventListener('click', function () {
       openPrdPanel(btn.getAttribute('data-prd-doc'));
@@ -5509,11 +5798,16 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
     });
   }
 
-  document.addEventListener('keydown', function (e) {
-    if (e.key !== 'Escape') return;
-    if (historyShell && historyShell.classList.contains('fx-ai-history-shell--open')) {
-      closeHistoryDrawer();
-      return;
+	  document.addEventListener('keydown', function (e) {
+	    if (e.key !== 'Escape') return;
+	    if (prdIsEditing) {
+	      e.preventDefault();
+	      cancelPrdEdit();
+	      return;
+	    }
+	    if (historyShell && historyShell.classList.contains('fx-ai-history-shell--open')) {
+	      closeHistoryDrawer();
+	      return;
     }
     if (root.classList.contains('fx-prd-open')) {
       closePrdPanel();
@@ -5583,10 +5877,12 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
   setConversationStarted(false);
   syncPanelA11y(false);
   syncFullscreenButton();
-  refreshUserTemplates();
-  setPrdFontSize(prdFontSize);
-  renderPrdDoc(activePrdDocId);
-  syncPrdA11y(false);
+	  refreshUserTemplates();
+	  prdDrafts = loadPrdDrafts();
+	  setPrdFontSize(prdFontSize);
+	  refreshPrdEditButtons();
+	  renderPrdDoc(activePrdDocId);
+	  syncPrdA11y(false);
 })();
 </script>
 
