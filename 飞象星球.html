@@ -2585,7 +2585,7 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
         <button type="button" class="fx-prd-edit-btn" id="fx-prd-edit-btn" title="编辑当前 PRD">编辑</button>
         <button type="button" class="fx-prd-edit-btn" id="fx-prd-save-btn" title="保存当前 PRD" hidden>保存</button>
         <button type="button" class="fx-prd-edit-btn" id="fx-prd-cancel-btn" title="取消编辑" hidden>取消</button>
-        <button type="button" class="fx-prd-edit-btn fx-prd-push-btn" id="fx-prd-push-btn" title="推送已保存的 PRD 到 GitHub">推送</button>
+        <button type="button" class="fx-prd-edit-btn fx-prd-push-btn" id="fx-prd-push-btn" title="推送到 yjt930/ai-learning-analysis-demo">推送</button>
         <button type="button" class="fx-prd-font-btn" id="fx-prd-font-btn" title="切换 PRD 字号" aria-label="切换 PRD 字号">字号 中</button>
         <button type="button" class="fx-ai-icon-btn" id="fx-prd-close-btn" title="关闭 PRD">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
@@ -4637,7 +4637,7 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
     if (!prdDocWrap || prdIsEditing) return;
     prdEditOriginalHtml = prdDocWrap.innerHTML;
     setPrdEditing(true);
-    setPrdStatus('正在编辑当前 PRD，保存后可推送到 GitHub。');
+    setPrdStatus('正在编辑当前 PRD，保存后可推送到 yjt930/ai-learning-analysis-demo。');
   }
 
   function saveActivePrdDraft(options) {
@@ -4700,7 +4700,7 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
   function getGithubToken() {
     var token = window.localStorage.getItem(PRD_TOKEN_KEY) || '';
     if (!token) {
-      token = window.prompt('请输入 GitHub fine-grained token（需要 Contents: Read and write）') || '';
+      token = window.prompt('目标仓库已固定：yjt930/ai-learning-analysis-demo\n\nGitHub 不允许网页匿名写仓库。请粘贴一次 GitHub fine-grained token（Contents: Read and write），之后会保存在本机浏览器。') || '';
       token = token.trim();
       if (token) window.localStorage.setItem(PRD_TOKEN_KEY, token);
     }
@@ -4716,7 +4716,7 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
     }
     var token = getGithubToken();
     if (!token) {
-      setPrdStatus('未填写 GitHub token，已取消推送。', 'error');
+      setPrdStatus('目标仓库已固定，但缺少 GitHub 授权，已取消推送。', 'error');
       return;
     }
     var apiUrl = 'https://api.github.com/repos/' + PRD_GITHUB_OWNER + '/' + PRD_GITHUB_REPO + '/contents/' + encodeURIComponent(PRD_GITHUB_PATH) + '?ref=' + encodeURIComponent(PRD_GITHUB_BRANCH);
