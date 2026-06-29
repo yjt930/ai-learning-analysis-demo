@@ -4697,6 +4697,24 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
     return window.btoa(binary);
   }
 
+  async function readGithubFileText(fileData, token) {
+    if (fileData.content && fileData.encoding === 'base64') {
+      return base64ToUtf8(fileData.content);
+    }
+    if (!fileData.download_url) {
+      throw new Error('GitHub 未返回可读取的文件内容');
+    }
+    var rawRes = await window.fetch(fileData.download_url, {
+      headers: {
+        Authorization: 'Bearer ' + token
+      }
+    });
+    if (!rawRes.ok) {
+      throw new Error('读取 GitHub 大文件内容失败');
+    }
+    return rawRes.text();
+  }
+
   function getGithubToken() {
     var token = window.localStorage.getItem(PRD_TOKEN_KEY) || '';
     if (!token) {
@@ -4733,7 +4751,7 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
       });
       var fileData = await getRes.json();
       if (!getRes.ok) throw new Error(fileData.message || '读取 GitHub 文件失败');
-      var source = base64ToUtf8(fileData.content);
+      var source = await readGithubFileText(fileData, token);
       var nextSource = source;
       Object.keys(prdDrafts).forEach(function (docId) {
         var doc = prdDocs[docId];
