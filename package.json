@@ -3,7 +3,6 @@
   "private": true,
   "description": "本地演示：学情分析 PRD 与飞象星球页面",
   "scripts": {
-    "prd:push-server": "node scripts/prd-local-push-server.mjs",
     "sync:prd": "node scripts/sync-prd-to-feixiang-html.mjs",
     "sync:prd:watch": "node scripts/sync-prd-to-feixiang-html.mjs --watch",
     "sync:prd:force": "node scripts/sync-prd-to-feixiang-html.mjs --force"

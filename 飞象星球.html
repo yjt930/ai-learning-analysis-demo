@@ -2235,14 +2235,6 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
   cursor: not-allowed;
   opacity: 0.56;
 }
-#fx-ai-learning-root .fx-prd-push-btn {
-  border-color: rgba(31,120,255,0.22);
-  background: #1f78ff;
-  color: #fff;
-}
-#fx-ai-learning-root .fx-prd-push-btn:hover {
-  background: #1359d2;
-}
 #fx-ai-learning-root .fx-prd-layout {
   flex: 1;
   min-height: 0;
@@ -2585,7 +2577,6 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
         <button type="button" class="fx-prd-edit-btn" id="fx-prd-edit-btn" title="编辑当前 PRD">编辑</button>
         <button type="button" class="fx-prd-edit-btn" id="fx-prd-save-btn" title="保存当前 PRD" hidden>保存</button>
         <button type="button" class="fx-prd-edit-btn" id="fx-prd-cancel-btn" title="取消编辑" hidden>取消</button>
-        <button type="button" class="fx-prd-edit-btn fx-prd-push-btn" id="fx-prd-push-btn" title="推送到 yjt930/ai-learning-analysis-demo">推送</button>
         <button type="button" class="fx-prd-font-btn" id="fx-prd-font-btn" title="切换 PRD 字号" aria-label="切换 PRD 字号">字号 中</button>
         <button type="button" class="fx-ai-icon-btn" id="fx-prd-close-btn" title="关闭 PRD">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
@@ -3033,7 +3024,6 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
   var prdEditBtn = document.getElementById('fx-prd-edit-btn');
   var prdSaveBtn = document.getElementById('fx-prd-save-btn');
   var prdCancelBtn = document.getElementById('fx-prd-cancel-btn');
-  var prdPushBtn = document.getElementById('fx-prd-push-btn');
   var prdDocWrap = document.getElementById('fx-prd-doc');
   var prdContentTitle = document.getElementById('fx-prd-content-title');
   var prdContentMeta = document.getElementById('fx-prd-content-meta');
@@ -3081,10 +3071,8 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
   var activePrdDocId = 'entry-panel';
   var prdFontSize = 'medium';
   var prdIsEditing = false;
-  var prdIsPushing = false;
   var prdEditOriginalHtml = '';
   var PRD_DRAFTS_KEY = 'fx-prd-inline-edits-v1';
-  var PRD_LOCAL_PUSH_URL = 'http://127.0.0.1:18790/push-prd';
   var prdDrafts = {};
   var lastUserPrompt = '';
 
@@ -4604,10 +4592,6 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
     if (prdEditBtn) prdEditBtn.hidden = prdIsEditing;
     if (prdSaveBtn) prdSaveBtn.hidden = !prdIsEditing;
     if (prdCancelBtn) prdCancelBtn.hidden = !prdIsEditing;
-    if (prdPushBtn) {
-      prdPushBtn.disabled = prdIsPushing;
-      prdPushBtn.textContent = prdIsPushing ? '推送中' : '推送';
-    }
   }
 
   function getPrdHtml(docId) {
@@ -4633,7 +4617,7 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
     if (!prdDocWrap || prdIsEditing) return;
     prdEditOriginalHtml = prdDocWrap.innerHTML;
     setPrdEditing(true);
-    setPrdStatus('正在编辑当前 PRD，保存后可推送到 yjt930/ai-learning-analysis-demo。');
+    setPrdStatus('正在编辑当前 PRD，保存后会保留在本机浏览器草稿。');
   }
 
   function saveActivePrdDraft(options) {
@@ -4649,7 +4633,7 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
     if (template) template.innerHTML = html;
     setPrdEditing(false);
     if (!options || !options.silent) {
-      setPrdStatus('已保存到本机浏览器，共 ' + getPrdDraftCount() + ' 个 PRD 待推送。', 'success');
+      setPrdStatus('已保存到本机浏览器，共 ' + getPrdDraftCount() + ' 个 PRD 草稿。', 'success');
     }
     return true;
   }
@@ -4675,40 +4659,6 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
     });
   }
 
-  async function pushProjectFromLocalService() {
-    if (prdIsPushing) return;
-    if (prdIsEditing && !saveActivePrdDraft({ silent: true })) return;
-    prdIsPushing = true;
-    refreshPrdEditButtons();
-    setPrdStatus('正在调用本机推送服务，将整个项目推送到 GitHub...');
-    try {
-      var res = await window.fetch(PRD_LOCAL_PUSH_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          drafts: prdDrafts,
-          message: 'Update project from PRD editor'
-        })
-      });
-      var data = await res.json();
-      if (!res.ok || !data.ok) throw new Error(data.message || '本机推送失败');
-      prdDrafts = {};
-      persistPrdDrafts();
-      setPrdStatus(data.message || '已推送整个项目。', 'success');
-    } catch (err) {
-      var message = err && err.message ? err.message : '推送失败';
-      if (/Failed to fetch|NetworkError|Load failed/i.test(message)) {
-        message = '本机推送服务未启动。请先双击项目里的“启动PRD推送服务.command”，保持窗口打开后再推送。';
-      }
-      setPrdStatus(message, 'error');
-    } finally {
-      prdIsPushing = false;
-      refreshPrdEditButtons();
-    }
-  }
-
   function renderPrdDoc(docId) {
     var id = prdDocs[docId] ? docId : 'entry-panel';
     var doc = prdDocs[id];
@@ -4727,7 +4677,7 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
       btn.classList.toggle('is-active', btn.getAttribute('data-prd-doc') === id);
     });
     prdDocWrap.scrollTop = 0;
-    setPrdStatus(prdDrafts[id] ? '该 PRD 有本机保存版本，可继续编辑或推送。' : '');
+    setPrdStatus(prdDrafts[id] ? '该 PRD 有本机保存草稿，可继续编辑。' : '');
   }
 
   function openPrdPanel(docId) {
@@ -5686,7 +5636,6 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
     saveActivePrdDraft();
   });
   if (prdCancelBtn) prdCancelBtn.addEventListener('click', cancelPrdEdit);
-  if (prdPushBtn) prdPushBtn.addEventListener('click', pushProjectFromLocalService);
   prdTocButtons.forEach(function (btn) {
     btn.addEventListener('click', function () {
       openPrdPanel(btn.getAttribute('data-prd-doc'));
