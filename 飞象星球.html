@@ -3084,11 +3084,7 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
   var prdIsPushing = false;
   var prdEditOriginalHtml = '';
   var PRD_DRAFTS_KEY = 'fx-prd-inline-edits-v1';
-  var PRD_TOKEN_KEY = 'fx-prd-github-token';
-  var PRD_GITHUB_OWNER = 'yjt930';
-  var PRD_GITHUB_REPO = 'ai-learning-analysis-demo';
-  var PRD_GITHUB_BRANCH = 'main';
-  var PRD_GITHUB_PATH = '飞象星球.html';
+  var PRD_LOCAL_PUSH_URL = 'http://127.0.0.1:18790/push-prd';
   var prdDrafts = {};
   var lastUserPrompt = '';
 
@@ -4679,115 +4675,34 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
     });
   }
 
-  function base64ToUtf8(base64) {
-    var binary = window.atob(base64.replace(/\s/g, ''));
-    var bytes = new Uint8Array(binary.length);
-    for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-    return new TextDecoder().decode(bytes);
-  }
-
-  function utf8ToBase64(text) {
-    var bytes = new TextEncoder().encode(text);
-    var binary = '';
-    var chunkSize = 0x8000;
-    for (var i = 0; i < bytes.length; i += chunkSize) {
-      var chunk = bytes.subarray(i, i + chunkSize);
-      binary += String.fromCharCode.apply(null, chunk);
-    }
-    return window.btoa(binary);
-  }
-
-  async function readGithubFileText(fileData, token) {
-    if (fileData.content && fileData.encoding === 'base64') {
-      return base64ToUtf8(fileData.content);
-    }
-    if (!fileData.download_url) {
-      throw new Error('GitHub 未返回可读取的文件内容');
-    }
-    var rawRes = await window.fetch(fileData.download_url, {
-      headers: {
-        Authorization: 'Bearer ' + token
-      }
-    });
-    if (!rawRes.ok) {
-      throw new Error('读取 GitHub 大文件内容失败');
-    }
-    return rawRes.text();
-  }
-
-  function getGithubToken() {
-    var token = window.localStorage.getItem(PRD_TOKEN_KEY) || '';
-    if (!token) {
-      token = window.prompt('目标仓库已固定：yjt930/ai-learning-analysis-demo\n\nGitHub 不允许网页匿名写仓库。请粘贴一次 GitHub fine-grained token（Contents: Read and write），之后会保存在本机浏览器。') || '';
-      token = token.trim();
-      if (token) window.localStorage.setItem(PRD_TOKEN_KEY, token);
-    }
-    return token;
-  }
-
-  async function pushPrdDraftsToGithub() {
+  async function pushProjectFromLocalService() {
     if (prdIsPushing) return;
     if (prdIsEditing && !saveActivePrdDraft({ silent: true })) return;
-    if (!getPrdDraftCount()) {
-      setPrdStatus('没有已保存的 PRD 修改需要推送。');
-      return;
-    }
-    var token = getGithubToken();
-    if (!token) {
-      setPrdStatus('目标仓库已固定，但缺少 GitHub 授权，已取消推送。', 'error');
-      return;
-    }
-    var apiUrl = 'https://api.github.com/repos/' + PRD_GITHUB_OWNER + '/' + PRD_GITHUB_REPO + '/contents/' + encodeURIComponent(PRD_GITHUB_PATH) + '?ref=' + encodeURIComponent(PRD_GITHUB_BRANCH);
     prdIsPushing = true;
     refreshPrdEditButtons();
-    setPrdStatus('正在读取 GitHub 最新版本...');
+    setPrdStatus('正在调用本机推送服务，将整个项目推送到 GitHub...');
     try {
-      var getRes = await window.fetch(apiUrl, {
+      var res = await window.fetch(PRD_LOCAL_PUSH_URL, {
+        method: 'POST',
         headers: {
-          Accept: 'application/vnd.github+json',
-          Authorization: 'Bearer ' + token,
-          'X-GitHub-Api-Version': '2022-11-28'
-        }
-      });
-      var fileData = await getRes.json();
-      if (!getRes.ok) throw new Error(fileData.message || '读取 GitHub 文件失败');
-      var source = await readGithubFileText(fileData, token);
-      var nextSource = source;
-      Object.keys(prdDrafts).forEach(function (docId) {
-        var doc = prdDocs[docId];
-        if (!doc || typeof prdDrafts[docId] !== 'string') return;
-        nextSource = replacePrdTemplateInSource(nextSource, doc.templateId, prdDrafts[docId]);
-      });
-      if (nextSource === source) {
-        setPrdStatus('没有检测到可提交的内容变化。');
-        return;
-      }
-      setPrdStatus('正在提交到 GitHub...');
-      var putRes = await window.fetch(apiUrl, {
-        method: 'PUT',
-        headers: {
-          Accept: 'application/vnd.github+json',
-          Authorization: 'Bearer ' + token,
-          'Content-Type': 'application/json',
-          'X-GitHub-Api-Version': '2022-11-28'
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          message: 'Update PRD from inline editor',
-          content: utf8ToBase64(nextSource),
-          sha: fileData.sha,
-          branch: PRD_GITHUB_BRANCH
+          drafts: prdDrafts,
+          message: 'Update project from PRD editor'
         })
       });
-      var putData = await putRes.json();
-      if (!putRes.ok) throw new Error(putData.message || '提交 GitHub 失败');
+      var data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.message || '本机推送失败');
       prdDrafts = {};
       persistPrdDrafts();
-      setPrdStatus('已推送到 GitHub：' + (putData.commit && putData.commit.sha ? putData.commit.sha.slice(0, 7) : '成功'), 'success');
+      setPrdStatus(data.message || '已推送整个项目。', 'success');
     } catch (err) {
-      if (/Bad credentials/i.test(err.message || '')) {
-        window.localStorage.removeItem(PRD_TOKEN_KEY);
+      var message = err && err.message ? err.message : '推送失败';
+      if (/Failed to fetch|NetworkError|Load failed/i.test(message)) {
+        message = '本机推送服务未启动。请先双击项目里的“启动PRD推送服务.command”，保持窗口打开后再推送。';
       }
-      setPrdStatus(err.message || '推送失败', 'error');
+      setPrdStatus(message, 'error');
     } finally {
       prdIsPushing = false;
       refreshPrdEditButtons();
@@ -5771,7 +5686,7 @@ mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
     saveActivePrdDraft();
   });
   if (prdCancelBtn) prdCancelBtn.addEventListener('click', cancelPrdEdit);
-  if (prdPushBtn) prdPushBtn.addEventListener('click', pushPrdDraftsToGithub);
+  if (prdPushBtn) prdPushBtn.addEventListener('click', pushProjectFromLocalService);
   prdTocButtons.forEach(function (btn) {
     btn.addEventListener('click', function () {
       openPrdPanel(btn.getAttribute('data-prd-doc'));
